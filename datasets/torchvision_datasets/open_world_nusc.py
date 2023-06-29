@@ -9,6 +9,7 @@ import copy
 from torchvision.datasets import VisionDataset
 import itertools
 
+import torchvision.transforms as T
 import numpy as np
 import xml.etree.ElementTree as ET
 from PIL import Image
@@ -36,7 +37,7 @@ class OWNuscDetection(VisionDataset):
                  args,
                  root,
                  version='v1.0-trainval',
-                 image_sets='t1_train_new-split',
+                 image_sets='t1_train_new_split',
                  transform=None,
                  target_transform=None,
                  transforms=None,
@@ -101,14 +102,12 @@ class OWNuscDetection(VisionDataset):
         instances = []
         for obj in target['annotation']['object']:
             cls = obj["name"]
-            if cls in VOC_CLASS_NAMES_COCOFIED:
-                cls = BASE_VOC_CLASS_NAMES[VOC_CLASS_NAMES_COCOFIED.index(cls)]
             bbox = obj["bndbox"]
             bbox = [float(bbox[x]) for x in ["xmin", "ymin", "xmax", "ymax"]]
             bbox[0] -= 1.0
             bbox[1] -= 1.0
             instance = dict(
-                category_id=VOC_COCO_CLASS_NAMES.index(cls),
+                category_id=NUSC_CLASS_NAMES.index(cls),
                 bbox=bbox,
                 area=(bbox[2] - bbox[0]) * (bbox[3] - bbox[1]),
                 image_id=img_id
@@ -126,8 +125,8 @@ class OWNuscDetection(VisionDataset):
     ### OWOD
     def remove_prev_class_and_unk_instances(self, target):
         # For training data. Removing earlier seen class objects and the unknown objects..
-        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
-        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
+        prev_intro_cls = 0
+        curr_intro_cls = 8
         valid_classes = range(prev_intro_cls, prev_intro_cls + curr_intro_cls)
         entry = copy.copy(target)
         for annotation in copy.copy(entry):
@@ -137,8 +136,8 @@ class OWNuscDetection(VisionDataset):
 
     def remove_unknown_instances(self, target):
         # For finetune data. Removing the unknown objects...
-        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
-        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
+        prev_intro_cls = 0
+        curr_intro_cls = 8
         valid_classes = range(0, prev_intro_cls+curr_intro_cls)
         entry = copy.copy(target)
         for annotation in copy.copy(entry):
@@ -149,9 +148,9 @@ class OWNuscDetection(VisionDataset):
     def label_known_class_and_unknown(self, target):
         # For test and validation data.
         # Label known instances the corresponding label and unknown instances as unknown.
-        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
-        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
-        total_num_class = self.args.num_classes #81
+        prev_intro_cls = 0
+        curr_intro_cls = 8 
+        total_num_class = 10 #10
         known_classes = range(0, prev_intro_cls+curr_intro_cls)
         entry = copy.copy(target)
         for annotation in  copy.copy(entry):
@@ -171,6 +170,7 @@ class OWNuscDetection(VisionDataset):
         image_set = self.transforms[0]
         img = Image.open(self.images[index]).convert('RGB')
         # print(self.images[index])
+        import pdb; pdb.set_trace()
         target, instances = self.load_instances(self.imgids[index])
         if 'train' in image_set:
             instances = self.remove_prev_class_and_unk_instances(instances)
@@ -218,3 +218,69 @@ class OWNuscDetection(VisionDataset):
             if not children:
                 voc_dict[node.tag] = text
         return voc_dict
+    
+def make_coco_transforms(image_set):
+
+    normalize = T.Compose([
+        T.ToTensor(),
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+    t=[]
+    
+    if 'train' in image_set:
+        t.append(['train'])
+        t.append(T.Compose([
+            T.RandomHorizontalFlip(),
+            T.RandomSelect(
+                T.RandomResize(scales, max_size=1333),
+                T.Compose([
+                    T.RandomResize([400, 500, 600]),
+                    T.RandomSizeCrop(384, 600),
+                    T.RandomResize(scales, max_size=1333),
+                ])
+            ),
+            normalize,
+        ]))
+        return t
+    
+    if 'ft' in image_set:
+        t.append(['ft'])
+        t.append(T.Compose([
+            T.RandomHorizontalFlip(),
+            T.RandomSelect(
+                T.RandomResize(scales, max_size=1333),
+                T.Compose([
+                    T.RandomResize([400, 500, 600]),
+                    T.RandomSizeCrop(384, 600),
+                    T.RandomResize(scales, max_size=1333),
+                ])
+            ),
+            normalize,
+        ]))
+        return t
+
+    if 'val' in image_set:
+        t.append(['val'])
+        t.append(T.Compose([
+            T.RandomResize([800], max_size=1333),
+            normalize,
+        ]))
+        return t
+
+    if 'test' in image_set:
+        t.append(['test'])
+        t.append(T.Compose([
+            T.RandomResize([800], max_size=1333),
+            normalize,
+        ]))
+        return t
+
+    raise ValueError(f'unknown {image_set}')
+    
+if __name__ == '__main__':
+    owod_path = '/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes'
+    train_set = 't1_train_new_split'
+    args = []
+    dataset_train = OWNuscDetection(args, owod_path, version=['v1.0-trainval'], image_sets=[train_set], transforms=make_coco_transforms(train_set))
