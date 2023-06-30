@@ -71,7 +71,7 @@ class OWNuscDetection(VisionDataset):
             self.images.extend([os.path.join(image_dir, x + ".jpg") for x in file_names])
             self.annotations.extend([os.path.join(annotation_dir, x + ".xml") for x in file_names])
 
-            self.imgids.extend(self.convert_image_id(x, to_integer=True) for x in file_names)
+            self.imgids.extend(self.convert_image_id(x, to_string=True) for x in file_names)
             self.imgid2annotations.update(dict(zip(self.imgids, self.annotations)))
 
         if filter_pct > 0:
@@ -83,7 +83,7 @@ class OWNuscDetection(VisionDataset):
         assert (len(self.images) == len(self.annotations) == len(self.imgids))
 
     @staticmethod
-    def convert_image_id(img_id, to_integer=False, to_string=False, prefix='2021'):
+    def convert_image_id(img_id, to_integer=False, to_string=False, prefix=''):
         if to_integer:
             return int(prefix + img_id.replace('_', ''))
         if to_string:
@@ -219,68 +219,10 @@ class OWNuscDetection(VisionDataset):
                 voc_dict[node.tag] = text
         return voc_dict
     
-def make_coco_transforms(image_set):
-
-    normalize = T.Compose([
-        T.ToTensor(),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-
-    scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
-    t=[]
-    
-    if 'train' in image_set:
-        t.append(['train'])
-        t.append(T.Compose([
-            T.RandomHorizontalFlip(),
-            T.RandomSelect(
-                T.RandomResize(scales, max_size=1333),
-                T.Compose([
-                    T.RandomResize([400, 500, 600]),
-                    T.RandomSizeCrop(384, 600),
-                    T.RandomResize(scales, max_size=1333),
-                ])
-            ),
-            normalize,
-        ]))
-        return t
-    
-    if 'ft' in image_set:
-        t.append(['ft'])
-        t.append(T.Compose([
-            T.RandomHorizontalFlip(),
-            T.RandomSelect(
-                T.RandomResize(scales, max_size=1333),
-                T.Compose([
-                    T.RandomResize([400, 500, 600]),
-                    T.RandomSizeCrop(384, 600),
-                    T.RandomResize(scales, max_size=1333),
-                ])
-            ),
-            normalize,
-        ]))
-        return t
-
-    if 'val' in image_set:
-        t.append(['val'])
-        t.append(T.Compose([
-            T.RandomResize([800], max_size=1333),
-            normalize,
-        ]))
-        return t
-
-    if 'test' in image_set:
-        t.append(['test'])
-        t.append(T.Compose([
-            T.RandomResize([800], max_size=1333),
-            normalize,
-        ]))
-        return t
-
-    raise ValueError(f'unknown {image_set}')
     
 if __name__ == '__main__':
     owod_path = '/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes'
     train_set = 't1_train_new_split'
     args = []
-    dataset_train = OWNuscDetection(args, owod_path, version=['v1.0-trainval'], image_sets=[train_set], transforms=make_coco_transforms(train_set))
+    dataset_train = OWNuscDetection(args, owod_path, version=['v1.0-trainval'], image_sets=[train_set])
+    import pdb; pdb.set_trace()
