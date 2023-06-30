@@ -30,7 +30,7 @@ UNK_CLASS = ["unknown"]
 CAMERA_SENSOR = ['CAM_FRONT', 'CAM_FRONT_LEFT', 'CAM_FRONT_RIGHT', 'CAM_BACK', 'CAM_BACK_LEFT', 'CAM_BACK_RIGHT']
 
 NUSC_CLASS_NAMES = tuple(itertools.chain(T1_CLASS_NAMES, UNK_CLASS))
-print(NUSC_CLASS_NAMES)
+# print(NUSC_CLASS_NAMES)
 
 class OWNuscDetection(VisionDataset):
     def __init__(self,
@@ -150,7 +150,7 @@ class OWNuscDetection(VisionDataset):
         # Label known instances the corresponding label and unknown instances as unknown.
         prev_intro_cls = 0
         curr_intro_cls = 8 
-        total_num_class = 10 #10
+        total_num_class = 11 # 10 + 1
         known_classes = range(0, prev_intro_cls+curr_intro_cls)
         entry = copy.copy(target)
         for annotation in  copy.copy(entry):

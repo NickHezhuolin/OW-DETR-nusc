@@ -23,9 +23,12 @@ import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
 from datasets.coco import make_coco_transforms
 from datasets.torchvision_datasets.open_world import OWDetection
+from datasets.torchvision_datasets.open_world_nusc import OWNuscDetection
 from engine import evaluate, train_one_epoch, viz
 from models import build_model
 
+
+import pdb; 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Deformable DETR Detector', add_help=False)
@@ -341,6 +344,11 @@ def get_datasets(args):
         test_set = args.test_set
         dataset_train = OWDetection(args, args.owod_path, ["2007"], image_sets=[args.train_set], transforms=make_coco_transforms(args.train_set))
         dataset_val = OWDetection(args, args.owod_path, ["2007"], image_sets=[args.test_set], transforms=make_coco_transforms(args.test_set))
+    elif args.dataset == 'owod_nusc':
+        train_set = args.train_set
+        test_set = args.test_set
+        dataset_train = OWNuscDetection(args, args.owod_path, image_sets=[args.train_set], transforms=make_coco_transforms(args.train_set))
+        dataset_val = OWNuscDetection(args, args.owod_path, image_sets=[args.test_set], transforms=make_coco_transforms(args.test_set))
     else:
         raise ValueError("Wrong dataset name")
 
@@ -354,7 +362,10 @@ def get_datasets(args):
 
 
 def set_dataset_path(args):
-    args.owod_path = os.path.join(args.data_root, 'VOC2007')
+    if args.dataset == 'owod':
+        args.owod_path = os.path.join(args.data_root, 'VOC2007')
+    elif args.dataset == 'owod_nusc':
+        args.owod_path = os.path.join(args.data_root, 'Nuscenes')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Deformable DETR training and evaluation script', parents=[get_args_parser()])
