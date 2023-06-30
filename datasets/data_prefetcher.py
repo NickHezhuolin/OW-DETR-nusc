@@ -8,7 +8,7 @@ import torch
 
 def to_cuda(samples, targets, device):
     samples = samples.to(device, non_blocking=True)
-    targets = [{k: v.to(device, non_blocking=True) for k, v in t.items()} for t in targets]
+    targets = [{k: v.to(device, non_blocking=True) if isinstance(v, torch.Tensor) else v for k, v in t.items()} for t in targets]
     return samples, targets
 
 class data_prefetcher():
@@ -58,7 +58,8 @@ class data_prefetcher():
             if targets is not None:
                 for t in targets:
                     for k, v in t.items():
-                        v.record_stream(torch.cuda.current_stream())
+                        if isinstance(v, torch.Tensor):
+                            v.record_stream(torch.cuda.current_stream())
             self.preload()
         else:
             try:

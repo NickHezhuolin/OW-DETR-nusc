@@ -18,18 +18,22 @@ from torchvision.datasets.utils import download_url, check_integrity, verify_str
 # OWOD nusc split
 
 ALL_CLASS_NAMES = [
-    'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'trailer', 'motorcycle', 'construction_vehicle'
+    'pedestrian', 'barrier', 'traffic_cone', 'bicycle', 'bus', 'car', 'truck', 'trailer', 'motorcycle', 'construction_vehicle'
 ]
 
 T1_CLASS_NAMES = [
-    'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'construction_vehicle'
+    'pedestrian', 'barrier', 'traffic_cone', 'bicycle', 'bus', 'car', 'truck', 'construction_vehicle'
+]
+
+T2_CLASS_NAMES = [
+    'trailer', 'motorcycle'
 ]
 
 UNK_CLASS = ["unknown"]
 
 CAMERA_SENSOR = ['CAM_FRONT', 'CAM_FRONT_LEFT', 'CAM_FRONT_RIGHT', 'CAM_BACK', 'CAM_BACK_LEFT', 'CAM_BACK_RIGHT']
 
-NUSC_CLASS_NAMES = tuple(itertools.chain(T1_CLASS_NAMES, UNK_CLASS))
+NUSC_CLASS_NAMES = tuple(itertools.chain(T1_CLASS_NAMES, T2_CLASS_NAMES, UNK_CLASS))
 # print(NUSC_CLASS_NAMES)
 
 class OWNuscDetection(VisionDataset):
@@ -60,7 +64,7 @@ class OWNuscDetection(VisionDataset):
 
             nusc_root = self.root
             annotation_dir = os.path.join(nusc_root, 'Annotations')
-            image_dir = os.path.join(nusc_root, 'JPEGImages')
+            image_dir = os.path.join(nusc_root, 'JEPGImages')
 
             if not os.path.isdir(nusc_root):
                 raise RuntimeError('Dataset not found or corrupted.' +
@@ -106,6 +110,7 @@ class OWNuscDetection(VisionDataset):
             bbox = [float(bbox[x]) for x in ["xmin", "ymin", "xmax", "ymax"]]
             bbox[0] -= 1.0
             bbox[1] -= 1.0
+            print(cls)
             instance = dict(
                 category_id=NUSC_CLASS_NAMES.index(cls),
                 bbox=bbox,
@@ -170,7 +175,6 @@ class OWNuscDetection(VisionDataset):
         image_set = self.transforms[0]
         img = Image.open(self.images[index]).convert('RGB')
         # print(self.images[index])
-        import pdb; pdb.set_trace()
         target, instances = self.load_instances(self.imgids[index])
         if 'train' in image_set:
             instances = self.remove_prev_class_and_unk_instances(instances)
@@ -181,7 +185,7 @@ class OWNuscDetection(VisionDataset):
 
         w, h = map(target['annotation']['size'].get, ['width', 'height'])
         target = dict(
-            image_id=torch.tensor([self.imgids[index]], dtype=torch.int64),
+            image_id=self.imgids[index],
             labels=torch.tensor([i['category_id'] for i in instances], dtype=torch.int64),
             area=torch.tensor([i['area'] for i in instances], dtype=torch.float32),
             boxes=torch.as_tensor([i['bbox'] for i in instances], dtype=torch.float32),

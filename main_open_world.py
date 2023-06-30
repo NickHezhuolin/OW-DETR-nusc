@@ -362,6 +362,7 @@ def get_datasets(args):
 
 
 def set_dataset_path(args):
+    
     if args.dataset == 'owod':
         args.owod_path = os.path.join(args.data_root, 'VOC2007')
     elif args.dataset == 'owod_nusc':

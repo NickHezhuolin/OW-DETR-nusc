@@ -2,7 +2,7 @@
 
 # 首先定义源目录和目标目录
 src_dirs=("/data/dataset2tssd/nuscenes/samples/CAM_BACK" "/data/dataset2tssd/nuscenes/samples/CAM_BACK_LEFT" "/data/dataset2tssd/nuscenes/samples/CAM_BACK_RIGHT" "/data/dataset2tssd/nuscenes/samples/CAM_FRONT" "/data/dataset2tssd/nuscenes/samples/CAM_FRONT_LEFT" "/data/dataset2tssd/nuscenes/samples/CAM_FRONT_RIGHT")
-dst_dir="/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes/JEPGImage"
+dst_dir="/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes/JEPGImages"
 
 # 创建目标目录，如果它还不存在的话
 mkdir -p $dst_dir
