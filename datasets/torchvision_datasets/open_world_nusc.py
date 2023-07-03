@@ -110,7 +110,7 @@ class OWNuscDetection(VisionDataset):
             bbox = [float(bbox[x]) for x in ["xmin", "ymin", "xmax", "ymax"]]
             bbox[0] -= 1.0
             bbox[1] -= 1.0
-            print(cls)
+            # print(cls)
             instance = dict(
                 category_id=NUSC_CLASS_NAMES.index(cls),
                 bbox=bbox,
