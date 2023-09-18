@@ -168,7 +168,7 @@ def viz(model, criterion, postprocessors, data_loader, base_ds, device, output_d
  
     for samples, targets in data_loader:
         samples = samples.to(device)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        targets = [{k: v for k, v in t.items()} for t in targets]
         top_k = len(targets[0]['boxes'])
  
         outputs = model(samples)

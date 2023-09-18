@@ -282,7 +282,8 @@ def main(args):
     if args.viz:
         viz(model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir)
         return
-
+    
+    import pdb; pdb.set_trace()
     print("Start training")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
