@@ -237,16 +237,16 @@ def plot_results(pil_img, scores, boxes, labels, ax, plot_prob=True, norm=True):
     image = plot_image(ax, pil_img, norm)
     colors = COLORS * 100
     if boxes is not None:
-        # for sc, cl, (xmin, ymin, xmax, ymax), c in zip(scores, labels, boxes.tolist(), colors):
-        #     ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
-        #                                fill=False, color=c, linewidth=2))
-            
-        #     text = f'{CLASSES[cl]}: {sc:0.2f}'
-        #     ax.text(xmin, ymin, text, fontsize=5, bbox=dict(facecolor='yellow', alpha=0.5))
-        import pdb; pdb.set_trace()
-        for (xmin, ymin, xmax, ymax), c in zip(boxes[0].tolist(), colors):
+        for sc, cl, (xmin, ymin, xmax, ymax), c in zip(scores, labels, boxes.tolist(), colors):
             ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                        fill=False, color=c, linewidth=2))
+            
+            text = f'{CLASSES[cl]}: {sc:0.2f}'
+            ax.text(xmin, ymin, text, fontsize=5, bbox=dict(facecolor='yellow', alpha=0.5))
+        # import pdb; pdb.set_trace()
+        # for (xmin, ymin, xmax, ymax), c in zip(boxes[0].tolist(), colors):
+        #     ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+        #                                fill=False, color=c, linewidth=2))
     ax.grid('off')
  
 

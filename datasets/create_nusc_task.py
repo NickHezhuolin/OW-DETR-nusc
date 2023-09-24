@@ -23,7 +23,7 @@ T1_CLASS_NAMES = [
 
 # Train
 nusc_coco_annotation_file = './data/OWDETR/Nuscenes/nuscenes_infos_train_mono3d.coco.json'
-dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_train_new_split.txt'
+dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_nusc_5cls_train_split.txt'
 
 coco_instance = COCO(nusc_coco_annotation_file)
 
@@ -54,7 +54,7 @@ print('Created train file')
 
 # Test
 nusc_coco_annotation_file = './data/OWDETR/Nuscenes/nuscenes_infos_val_mono3d.coco.json'
-dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_test_new_split.txt'
+dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_nusc_5cls_val_split.txt'
 
 coco_instance = COCO(nusc_coco_annotation_file)
 
