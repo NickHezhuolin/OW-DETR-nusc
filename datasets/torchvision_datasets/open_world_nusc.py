@@ -22,11 +22,11 @@ ALL_CLASS_NAMES = [
 ]
 
 T1_CLASS_NAMES = [
-    'pedestrian', 'barrier', 'traffic_cone', 'bicycle', 'bus', 'car', 'truck', 'construction_vehicle'
+    'pedestrian', 'barrier', 'bicycle', 'car', 'construction_vehicle'
 ]
 
 T2_CLASS_NAMES = [
-    'trailer', 'motorcycle'
+     'traffic_cone', 'trailer', 'bus', 'truck', 'motorcycle'
 ]
 
 UNK_CLASS = ["unknown"]
@@ -34,7 +34,7 @@ UNK_CLASS = ["unknown"]
 CAMERA_SENSOR = ['CAM_FRONT', 'CAM_FRONT_LEFT', 'CAM_FRONT_RIGHT', 'CAM_BACK', 'CAM_BACK_LEFT', 'CAM_BACK_RIGHT']
 
 NUSC_CLASS_NAMES = tuple(itertools.chain(T1_CLASS_NAMES, T2_CLASS_NAMES, UNK_CLASS))
-# print(NUSC_CLASS_NAMES)
+print(NUSC_CLASS_NAMES)
 
 class OWNuscDetection(VisionDataset):
     def __init__(self,
@@ -65,7 +65,7 @@ class OWNuscDetection(VisionDataset):
             nusc_root = self.root
             annotation_dir = os.path.join(nusc_root, 'Annotations')
             image_dir = os.path.join(nusc_root, 'JEPGImages')
-
+            print(nusc_root)
             if not os.path.isdir(nusc_root):
                 raise RuntimeError('Dataset not found or corrupted.' +
                                    ' You can use download=True to download it')
@@ -75,7 +75,7 @@ class OWNuscDetection(VisionDataset):
             self.images.extend([os.path.join(image_dir, x + ".jpg") for x in file_names])
             self.annotations.extend([os.path.join(annotation_dir, x + ".xml") for x in file_names])
 
-            self.imgids.extend(self.convert_image_id(x, to_string=True) for x in file_names)
+            self.imgids.extend(self.convert_image_id(x) for x in file_names)
             self.imgid2annotations.update(dict(zip(self.imgids, self.annotations)))
 
         if filter_pct > 0:
@@ -87,16 +87,9 @@ class OWNuscDetection(VisionDataset):
         assert (len(self.images) == len(self.annotations) == len(self.imgids))
 
     @staticmethod
-    def convert_image_id(img_id, to_integer=False, to_string=False, prefix=''):
-        if to_integer:
-            return int(prefix + img_id.replace('_', ''))
-        if to_string:
-            x = str(img_id)
-            assert x.startswith(prefix)
-            x = x[len(prefix):]
-            if len(x) == 12 or len(x) == 6:
-                return x
-            return x[:4] + '_' + x[4:]
+    def convert_image_id(img_id):
+        converted_str = img_id.replace('-', '_').replace('+', '_')
+        return converted_str
 
     @functools.lru_cache(maxsize=None)
     def load_instances(self, img_id):
@@ -130,8 +123,8 @@ class OWNuscDetection(VisionDataset):
     ### OWOD
     def remove_prev_class_and_unk_instances(self, target):
         # For training data. Removing earlier seen class objects and the unknown objects..
-        prev_intro_cls = 0
-        curr_intro_cls = 8
+        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
+        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
         valid_classes = range(prev_intro_cls, prev_intro_cls + curr_intro_cls)
         entry = copy.copy(target)
         for annotation in copy.copy(entry):
@@ -141,8 +134,8 @@ class OWNuscDetection(VisionDataset):
 
     def remove_unknown_instances(self, target):
         # For finetune data. Removing the unknown objects...
-        prev_intro_cls = 0
-        curr_intro_cls = 8
+        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
+        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
         valid_classes = range(0, prev_intro_cls+curr_intro_cls)
         entry = copy.copy(target)
         for annotation in copy.copy(entry):
@@ -153,9 +146,9 @@ class OWNuscDetection(VisionDataset):
     def label_known_class_and_unknown(self, target):
         # For test and validation data.
         # Label known instances the corresponding label and unknown instances as unknown.
-        prev_intro_cls = 0
-        curr_intro_cls = 8 
-        total_num_class = 11 # 10 + 1
+        prev_intro_cls = self.args.PREV_INTRODUCED_CLS
+        curr_intro_cls = self.args.CUR_INTRODUCED_CLS
+        total_num_class = self.args.num_classes # 10 + 1
         known_classes = range(0, prev_intro_cls+curr_intro_cls)
         entry = copy.copy(target)
         for annotation in  copy.copy(entry):
@@ -176,6 +169,8 @@ class OWNuscDetection(VisionDataset):
         img = Image.open(self.images[index]).convert('RGB')
         # print(self.images[index])
         target, instances = self.load_instances(self.imgids[index])
+        print(image_set)
+        import pdb; pdb.set_trace()
         if 'train' in image_set:
             instances = self.remove_prev_class_and_unk_instances(instances)
         elif 'test' in image_set:
@@ -225,8 +220,7 @@ class OWNuscDetection(VisionDataset):
     
     
 if __name__ == '__main__':
-    owod_path = '/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes'
-    train_set = 't1_train_new_split'
+    owod_path = '/home/hez4sgh/1_workspace/5_my_repo/OW-DETR-nusc/data/OWDETR/Nuscenes'
+    train_set = 't1_nusc_5cls_train_split'
     args = []
     dataset_train = OWNuscDetection(args, owod_path, version=['v1.0-trainval'], image_sets=[train_set])
-    import pdb; pdb.set_trace()
