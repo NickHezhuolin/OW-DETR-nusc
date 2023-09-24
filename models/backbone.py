@@ -110,7 +110,7 @@ class Backbone(BackboneBase):
             print("DINO resnet50")
             backbone = resnet50(pretrained=False, replace_stride_with_dilation=[False, False, dilation], norm_layer=norm_layer)
             if is_main_process():
-                state_dict = torch.load("/home/hez4sgh/1_workspace/OW-DETR/models/dino_resnet50_pretrain.pth")
+                state_dict = torch.load("/home1/hezhuolin/0_data/ckpts/dino_resnet50_pretrain.pth")
                 backbone.load_state_dict(state_dict, strict=False)
         assert name not in ('resnet18', 'resnet34'), "number of channels are hard coded"
         super().__init__(backbone, train_backbone, return_interm_layers)

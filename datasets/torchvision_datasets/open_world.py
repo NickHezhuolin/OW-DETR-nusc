@@ -169,7 +169,7 @@ class OWDetection(VisionDataset):
         return target, instances
 
     def extract_fns(self, image_set, voc_root):
-        splits_dir = os.path.join(voc_root, 'ImageSets/Main')
+        splits_dir = os.path.join(voc_root, 'ImageSets/')
         split_f = os.path.join(splits_dir, image_set.rstrip('\n') + '.txt')
         with open(os.path.join(split_f), "r") as f:
             file_names = [x.strip() for x in f.readlines()]
