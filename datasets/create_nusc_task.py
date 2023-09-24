@@ -1,18 +1,29 @@
 from pycocotools.coco import COCO
 import numpy as np
 
-# 8+2 
-ALL_CLASS_NAMES = [
-    'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'trailer', 'motorcycle', 'construction_vehicle'
-]
+# ALL_CLASS_NAMES = [
+#     'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'trailer', 'motorcycle', 'construction_vehicle'
+# ]
+
+# 5 + 5 : withour 'trafficcone', bus, motorcycle, 'truck', 'trailer'
 T1_CLASS_NAMES = [
-    'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'construction_vehicle'
+    'pedestrain', 'barrier', 'bicycle', 'car', 'construction_vehicle'
 ]
+
+# 7 + 3 : withour motorcycle, 'truck', 'trailer'
+# T2_CLASS_NAMES = [
+#     'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'construction_vehicle'
+# ]
+
+# 9 + 1 : withour motorcycle
+# T3_CLASS_NAMES = [
+#     'pedestrain', 'barrier', 'trafficcone', 'bicycle', 'bus', 'car', 'truck', 'trailer', 'construction_vehicle'
+# ]
 
 
 # Train
-nusc_coco_annotation_file = '/data/dataset2tssd/nuscenes/nuscenes_infos_train_mono3d.coco.json'
-dest_file = '/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes/ImageSets/t1_train_new_split.txt'
+nusc_coco_annotation_file = './data/OWDETR/Nuscenes/nuscenes_infos_train_mono3d.coco.json'
+dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_train_new_split.txt'
 
 coco_instance = COCO(nusc_coco_annotation_file)
 
@@ -42,8 +53,8 @@ with open(dest_file, 'w') as file:
 print('Created train file')
 
 # Test
-nusc_coco_annotation_file = '/data/dataset2tssd/nuscenes/nuscenes_infos_val_mono3d.coco.json'
-dest_file = '/home/hez4sgh/1_workspace/OW-DETR-nusc/data/OWDETR/Nuscenes/ImageSets/t1_test_new_split.txt'
+nusc_coco_annotation_file = './data/OWDETR/Nuscenes/nuscenes_infos_val_mono3d.coco.json'
+dest_file = './data/OWDETR/Nuscenes/ImageSets/t1_test_new_split.txt'
 
 coco_instance = COCO(nusc_coco_annotation_file)
 
