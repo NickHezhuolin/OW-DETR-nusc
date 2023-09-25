@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=1
 
 set -x
 
-EXP_DIR=exps/OWDETR_t1
+EXP_DIR=exps/OWDETR_nusc_t1
 PY_ARGS=${@:1}
 
 # owdetr-nusc-train

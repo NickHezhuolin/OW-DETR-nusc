@@ -169,8 +169,6 @@ class OWNuscDetection(VisionDataset):
         img = Image.open(self.images[index]).convert('RGB')
         # print(self.images[index])
         target, instances = self.load_instances(self.imgids[index])
-        print(image_set)
-        import pdb; pdb.set_trace()
         if 'train' in image_set:
             instances = self.remove_prev_class_and_unk_instances(instances)
         elif 'test' in image_set:
